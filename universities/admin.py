@@ -1,14 +1,13 @@
 from django.contrib import admin
 from .models import University, UniversityDepartment, AdmissionResult
 
-# 가로형 입력 폼 (StackedInline)
 class AdmissionResultInline(admin.StackedInline):
     model = AdmissionResult
     extra = 0
     
     fieldsets = (
         ('기본 정보', {
-            'fields': (('year', 'recruit_count', 'total_average_grade'),)
+            'fields': (('year', 'recruit_count'),)  # 평균등급 삭제됨
         }),
         ('국어 성적', {
             'fields': (('korean_grade', 'korean_percentile'),)
@@ -17,7 +16,7 @@ class AdmissionResultInline(admin.StackedInline):
             'fields': (('math_grade', 'math_percentile'),)
         }),
         ('영어 성적', {
-            'fields': (('english_grade', 'english_percentile'),)
+            'fields': (('english_grade',),)  # 백분위 삭제됨
         }),
         ('탐구 성적', {
             'fields': (('inquiry_grade', 'inquiry_percentile'),)

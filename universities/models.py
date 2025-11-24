@@ -3,7 +3,7 @@ from django.db import models
 class University(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="대학명")
     
-    # 기준학과 안내 (이미지 vs 텍스트)
+    # 기준학과 안내
     standard_guide_image = models.ImageField(
         upload_to='university_guides/', 
         null=True, blank=True, 
@@ -72,7 +72,6 @@ class UniversityDepartment(models.Model):
     def __str__(self):
         return f"{self.university.name} {self.name}"
 
-    # API 출력용 헬퍼
     @property
     def get_english_info(self):
         method = self.english_method or self.university.default_english_method
@@ -89,20 +88,21 @@ class AdmissionResult(models.Model):
     year = models.IntegerField(verbose_name="학년도")
     recruit_count = models.IntegerField(null=True, blank=True, verbose_name="모집인원")
     
-    # 과목별 상세 성적 (등급 / 백분위)
+    # 과목별 상세 성적
+    # 1. 국어
     korean_grade = models.FloatField(null=True, blank=True, verbose_name="국어 등급")
     korean_percentile = models.FloatField(null=True, blank=True, verbose_name="국어 백분위")
     
+    # 2. 수학
     math_grade = models.FloatField(null=True, blank=True, verbose_name="수학 등급")
     math_percentile = models.FloatField(null=True, blank=True, verbose_name="수학 백분위")
     
+    # 3. 영어 (등급만 남김)
     english_grade = models.FloatField(null=True, blank=True, verbose_name="영어 등급")
-    english_percentile = models.FloatField(null=True, blank=True, verbose_name="영어 백분위")
     
+    # 4. 탐구
     inquiry_grade = models.FloatField(null=True, blank=True, verbose_name="탐구 등급")
     inquiry_percentile = models.FloatField(null=True, blank=True, verbose_name="탐구 백분위")
-
-    total_average_grade = models.FloatField(null=True, blank=True, verbose_name="전체 평균 등급")
 
     class Meta:
         ordering = ['-year']
@@ -111,13 +111,12 @@ class AdmissionResult(models.Model):
     def __str__(self):
         return f"{self.department.name} ({self.year})"
 
-    # 평균 백분위 자동 계산 로직
+    # [수정] 평균 백분위 자동 계산 (국/수/탐 3과목만 계산)
     @property
     def average_percentile(self):
         scores = [
             self.korean_percentile, 
             self.math_percentile, 
-            self.english_percentile, 
             self.inquiry_percentile
         ]
         # None이 아닌 값만 필터링
